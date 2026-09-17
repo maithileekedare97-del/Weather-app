@@ -25,8 +25,18 @@ A modern, fast, and intuitive weather forecast application built with **React Na
 
 ## 📲 Direct APK Download (Android)
 
-You can download and install the standalone Android application directly (no Expo Go required):
-👉 **[Download WeatherCast.apk (Latest)](https://expo.dev/artifacts/eas/f-BJOZ7UrMEM-_ckXPjmnFZB4p6XQR52TgOd9Ib8byA.apk)**
+Share this standalone APK with testers. They **do not** need Expo Go, the same Wi‑Fi network, or a computer running Metro.
+
+👉 **[Download WeatherCast.apk](https://expo.dev/artifacts/eas/f-BJOZ7UrMEM-_ckXPjmnFZB4p6XQR52TgOd9Ib8byA.apk)**
+
+A local copy is also saved as `WeatherCast.apk` (gitignored) so you can send it over WhatsApp, Google Drive, email, or USB.
+
+### Install on Android
+1. Download the APK on the phone.
+2. Open the file. If Android blocks it, allow installs from that source (Chrome / Files / Drive).
+3. Tap **Install**, then open **WeatherCast**.
+
+The package name is `com.maithilee.weathercast`. This build is for sideloading, not the Play Store (Play Store would use an `.aab` from `eas build --platform android --profile production`).
 
 ---
 
