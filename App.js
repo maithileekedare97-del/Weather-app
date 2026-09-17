@@ -95,21 +95,20 @@ export default function App() {
     }
   }, []);
 
-  // Search by city name string
-  const handleSearchCityName = useCallback(async (cityName) => {
-    setError(null);
-    setLoading(true);
-    setLastAction(() => () => handleSearchCityName(cityName));
-
-    try {
-      const results = await searchCity(cityName);
-      const chosenCity = results[0];
-      await loadWeatherForCity(chosenCity);
-    } catch (err) {
-      setError(err.message || `No results found for "${cityName}".`);
-      setLoading(false);
-    }
-  }, [loadWeatherForCity]);
+  // Handle city selection from search or suggestions
+  const handleSelectCity = useCallback(
+    async (cityItem, customError) => {
+      if (customError) {
+        setError(customError);
+        setLoading(false);
+        return;
+      }
+      if (cityItem) {
+        await loadWeatherForCity(cityItem);
+      }
+    },
+    [loadWeatherForCity]
+  );
 
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {
@@ -214,8 +213,8 @@ export default function App() {
         </View>
       </View>
 
-      {/* Search Input Bar */}
-      <SearchBar onSearch={handleSearchCityName} isLoading={loading && !refreshing} />
+      {/* Search Input Bar with Live Suggestions */}
+      <SearchBar onSelectCity={handleSelectCity} isLoading={loading && !refreshing} />
 
       {/* Recent Searches Pills */}
       <RecentSearches

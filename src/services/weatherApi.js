@@ -113,6 +113,181 @@ export function getWeatherDetails(code, isDay = 1) {
   }
 }
 
+// Common region and state aliases mapped to their primary meteorological centers / capitals
+const REGION_ALIASES = {
+  kerala: {
+    id: 'alias-kerala-in',
+    name: 'Kerala (Thiruvananthapuram)',
+    admin1: 'Kerala',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 8.5241,
+    longitude: 76.9366,
+  },
+  kashmir: {
+    id: 'alias-kashmir-in',
+    name: 'Kashmir (Srinagar)',
+    admin1: 'Jammu and Kashmir',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 34.0837,
+    longitude: 74.7973,
+  },
+  kasmir: {
+    id: 'alias-kasmir-in',
+    name: 'Kashmir (Srinagar)',
+    admin1: 'Jammu and Kashmir',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 34.0837,
+    longitude: 74.7973,
+  },
+  jammu: {
+    id: 'alias-jammu-in',
+    name: 'Jammu',
+    admin1: 'Jammu and Kashmir',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 32.7266,
+    longitude: 74.857,
+  },
+  goa: {
+    id: 'alias-goa-in',
+    name: 'Goa (Panaji)',
+    admin1: 'Goa',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 15.4909,
+    longitude: 73.8278,
+  },
+  punjab: {
+    id: 'alias-punjab-in',
+    name: 'Punjab (Chandigarh)',
+    admin1: 'Punjab',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 30.7333,
+    longitude: 76.7794,
+  },
+  ladakh: {
+    id: 'alias-ladakh-in',
+    name: 'Ladakh (Leh)',
+    admin1: 'Ladakh',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 34.1526,
+    longitude: 77.5771,
+  },
+  rajasthan: {
+    id: 'alias-rajasthan-in',
+    name: 'Rajasthan (Jaipur)',
+    admin1: 'Rajasthan',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 26.9124,
+    longitude: 75.7873,
+  },
+  maharashtra: {
+    id: 'alias-maharashtra-in',
+    name: 'Maharashtra (Mumbai)',
+    admin1: 'Maharashtra',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 19.076,
+    longitude: 72.8777,
+  },
+  delhi: {
+    id: 'alias-delhi-in',
+    name: 'New Delhi',
+    admin1: 'Delhi',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 28.6139,
+    longitude: 77.209,
+  },
+  'new delhi': {
+    id: 'alias-newdelhi-in',
+    name: 'New Delhi',
+    admin1: 'Delhi',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 28.6139,
+    longitude: 77.209,
+  },
+  'tamil nadu': {
+    id: 'alias-tamilnadu-in',
+    name: 'Tamil Nadu (Chennai)',
+    admin1: 'Tamil Nadu',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 13.0827,
+    longitude: 80.2707,
+  },
+  tamilnadu: {
+    id: 'alias-tamilnadu-in',
+    name: 'Tamil Nadu (Chennai)',
+    admin1: 'Tamil Nadu',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 13.0827,
+    longitude: 80.2707,
+  },
+  karnataka: {
+    id: 'alias-karnataka-in',
+    name: 'Karnataka (Bengaluru)',
+    admin1: 'Karnataka',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 12.9716,
+    longitude: 77.5946,
+  },
+  gujarat: {
+    id: 'alias-gujarat-in',
+    name: 'Gujarat (Ahmedabad)',
+    admin1: 'Gujarat',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 23.0225,
+    longitude: 72.5714,
+  },
+  'uttar pradesh': {
+    id: 'alias-up-in',
+    name: 'Uttar Pradesh (Lucknow)',
+    admin1: 'Uttar Pradesh',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 26.8467,
+    longitude: 80.9462,
+  },
+  'himachal pradesh': {
+    id: 'alias-himachal-in',
+    name: 'Himachal Pradesh (Shimla)',
+    admin1: 'Himachal Pradesh',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 31.1048,
+    longitude: 77.1734,
+  },
+  himachal: {
+    id: 'alias-himachal-in',
+    name: 'Himachal Pradesh (Shimla)',
+    admin1: 'Himachal Pradesh',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 31.1048,
+    longitude: 77.1734,
+  },
+  uttarakhand: {
+    id: 'alias-uk-in',
+    name: 'Uttarakhand (Dehradun)',
+    admin1: 'Uttarakhand',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 30.3165,
+    longitude: 78.0322,
+  },
+};
+
 /**
  * Searches for cities matching a query string using Open-Meteo Geocoding.
  */
@@ -122,7 +297,10 @@ export async function searchCity(query) {
     throw new Error('Please enter at least 2 characters to search.');
   }
 
-  const url = `${GEOCODING_BASE_URL}?name=${encodeURIComponent(trimmed)}&count=5&language=en&format=json`;
+  const normalized = trimmed.toLowerCase();
+  const matchedAlias = REGION_ALIASES[normalized];
+
+  const url = `${GEOCODING_BASE_URL}?name=${encodeURIComponent(trimmed)}&count=10&language=en&format=json`;
 
   try {
     const response = await fetch(url);
@@ -131,20 +309,44 @@ export async function searchCity(query) {
     }
 
     const data = await response.json();
-    if (!data.results || data.results.length === 0) {
+    let results = [];
+
+    if (data.results && data.results.length > 0) {
+      results = data.results.map((item) => ({
+        id: `${item.id}-${item.name}-${item.country_code}`,
+        name: item.name,
+        admin1: item.admin1 || '',
+        country: item.country || '',
+        countryCode: item.country_code || '',
+        latitude: item.latitude,
+        longitude: item.longitude,
+        population: item.population || 0,
+      }));
+
+      // Sort by population and relevant names
+      results.sort((a, b) => {
+        // Boost Indian locations if name matches
+        const aIsIndia = a.countryCode === 'IN' ? 1 : 0;
+        const bIsIndia = b.countryCode === 'IN' ? 1 : 0;
+        if (aIsIndia !== bIsIndia) return bIsIndia - aIsIndia;
+        return (b.population || 0) - (a.population || 0);
+      });
+    }
+
+    // Prepend alias if one exists
+    if (matchedAlias) {
+      results = [matchedAlias, ...results.filter((r) => r.id !== matchedAlias.id)];
+    }
+
+    if (results.length === 0) {
       throw new Error(`No city found matching "${trimmed}". Please check the spelling.`);
     }
 
-    return data.results.map((item) => ({
-      id: `${item.id}-${item.name}-${item.country_code}`,
-      name: item.name,
-      admin1: item.admin1 || '',
-      country: item.country || '',
-      countryCode: item.country_code || '',
-      latitude: item.latitude,
-      longitude: item.longitude,
-    }));
+    return results;
   } catch (error) {
+    if (matchedAlias) {
+      return [matchedAlias];
+    }
     if (error.message.includes('Network') || error.message.includes('fetch')) {
       throw new Error('Network error. Please check your internet connection and try again.');
     }
