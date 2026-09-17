@@ -23,6 +23,13 @@ A modern, fast, and intuitive weather forecast application built with **React Na
 
 ---
 
+## 📲 Direct APK Download (Android)
+
+You can download and install the standalone Android application directly (no Expo Go required):
+👉 **[Download WeatherCast.apk (Latest)](https://expo.dev/artifacts/eas/f-BJOZ7UrMEM-_ckXPjmnFZB4p6XQR52TgOd9Ib8byA.apk)**
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
