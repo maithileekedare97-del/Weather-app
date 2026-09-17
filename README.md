@@ -6,7 +6,7 @@ A modern, fast, and intuitive weather forecast application built with **React Na
 
 ## 📱 Features
 
-- 🔍 **City Search**: Instant global city search powered by Open-Meteo Geocoding.
+- 🔍 **City Search**: Instant global city search with live suggestions as you type, powered by Open-Meteo Geocoding.
 - 🌡️ **Current Weather Overview**:
   - City name, region, and country
   - Real-time temperature and "feels like" metric
@@ -43,18 +43,15 @@ The package name is `com.maithilee.weathercast`. This build is for sideloading, 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** (v18 or newer recommended, tested on v24)
-- **npm** (v9 or newer)
-- **Expo Go** mobile app installed on your smartphone:
-  - [Android (Google Play Store)](https://play.google.com/store/apps/details?id=host.exp.exponent)
-  - [iOS (Apple App Store)](https://apps.apple.com/app/expo-go/id982107779)
+- **To try the app**: an Android phone and the APK link above. Expo Go is not required.
+- **To run from source**: **Node.js** (v18 or newer recommended, tested on v24), **npm**, and optionally **Expo Go** on a phone on the same Wi‑Fi.
 
 ### Installation & Running
 
 1. **Clone the repository**:
    ```bash
-   git clone <YOUR_GITHUB_REPO_LINK>
-   cd "Weather app"
+   git clone https://github.com/maithileekedare97-del/Weather-app.git
+   cd Weather-app
    ```
 
 2. **Install dependencies**:
@@ -77,22 +74,24 @@ The package name is `com.maithilee.weathercast`. This build is for sideloading, 
 
 ## 🏗️ Architecture & State Flow
 
-The application follows a clean, single-source-of-truth unidirectional state architecture.
+The application follows a clean, single-source-of-truth unidirectional state architecture. Reviewers can run it two ways: **install the standalone APK** (no shared Wi‑Fi), or **clone and use Expo Go** for development.
 
 ```mermaid
 graph TD
     A[User Opens App] --> B[Load AsyncStorage Preferences & Recent Searches]
-    B --> C[Fetch Default or Last Viewed City Weather]
-    
+    B --> C[Fetch Last Viewed City or Default London]
+
     subgraph User Actions
-        D1[Search City Input] --> E1[Open-Meteo Geocoding API]
-        D2[Tap Recent Search Chip] --> E2[Fetch Selected City Weather]
+        D1[Type in Search Bar] --> E0[Debounced Live Suggestions]
+        E0 --> E1[Open-Meteo Geocoding API]
+        D1b[Submit Search or Tap Suggestion] --> E2
+        D2[Tap Recent Search Chip] --> E2[Open-Meteo Forecast API]
         D3[Pull to Refresh] --> E2
         D4[Tap GPS Button] --> E3[expo-location GPS & Reverse Geocoding]
         D5[Toggle °C / °F] --> E4[Update Unit State & Save to AsyncStorage]
     end
 
-    E1 -->|City Found| E2[Open-Meteo Forecast API]
+    E1 -->|City Found| E2
     E1 -->|City Not Found / Error| F[Set Error State]
     E3 -->|Coordinates Retrieved| E2
     E3 -->|Permission Denied / GPS Error| F
@@ -100,18 +99,26 @@ graph TD
     E2 -->|Data Received| G[Update Weather State & Save Recent Searches]
     E2 -->|Network Failure| F
 
-    F --> H[Render ErrorView with 'Try Again' Action]
+    F --> H[Render ErrorView with Try Again]
     H -->|User Clicks Retry| E2
 
     G --> I[Render Main View: Current Weather + 7-Day Forecast]
+
+    subgraph Distribution
+        J[EAS Preview Build] --> K[Standalone WeatherCast.apk]
+        K --> L[Install on any Android phone without Expo Go]
+    end
 ```
 
 ### Folder Structure
 ```
-weather-app/
+Weather-app/
 ├── App.js                       # Main application shell, state management & layout
-├── app.json                     # Expo configuration, dark theme & permission strings
+├── index.js                     # Expo entry point
+├── app.json                     # Expo config, Android package id, EAS project id
+├── eas.json                     # EAS Build profiles (preview APK, production AAB)
 ├── package.json                 # Project dependencies & scripts
+├── assets/                      # App icon, splash, and adaptive icons
 └── src/
     ├── constants/
     │   └── theme.js             # Design tokens, color palettes, and spacing
@@ -119,7 +126,7 @@ weather-app/
     │   ├── weatherApi.js        # Open-Meteo geocoding & forecast client, WMO parser
     │   └── storage.js           # AsyncStorage helper for recent searches & unit pref
     └── components/
-        ├── SearchBar.jsx        # Search input with clear button & submit action
+        ├── SearchBar.jsx        # Search input, live suggestions dropdown, clear/submit
         ├── RecentSearches.jsx   # Horizontal chip list with 1-tap re-queries
         ├── CurrentWeather.jsx   # Weather card: temp, condition, humidity, wind
         ├── ForecastList.jsx     # 7-day daily forecast rows
@@ -139,6 +146,8 @@ weather-app/
    - The GPS feature requires user permission. If denied, the app gracefully presents an alert and allows manual search to continue uninterrupted.
 4. **Network Connectivity**:
    - Offline caching is currently limited to storing the search history and unit preference. If offline, the app prompts the user with a retry button once reconnected.
+5. **APK distribution**:
+   - The preview APK is signed for sideloading, not Play Store listing. Testers may need to allow installs from unknown sources. iOS has no equivalent unsigned IPA in this submission.
 
 ---
 
@@ -146,7 +155,7 @@ weather-app/
 
 ### 1. Implementation, Design Decisions & Steering the AI Assistant
 - **Trade-offs**:
-  - We opted for Expo Go rather than bare React Native to eliminate local compilation overhead (no Xcode / Android Studio required for reviewers), keeping setup time under 2 minutes.
+  - We used Expo (SDK 57) rather than bare React Native so development can run in Expo Go without Android Studio. For reviewers who are not on the same Wi‑Fi, we also published a standalone EAS **preview APK**.
   - We used standard React Native components and `@expo/vector-icons` to deliver a dark-mode glassmorphic interface with 0 external UI library bloat.
   - Used WMO standard code translation tables directly in `weatherApi.js` to avoid additional 3rd-party weather mapping libraries.
 - **Steering the AI Assistant**:
